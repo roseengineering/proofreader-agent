@@ -39,7 +39,7 @@ Since LibreOffice enforces a timeout when calling the server,
 the LLM is called in the background.  To get the latest grammar checks
 the server needs to be called again.  Since adding spaces at the
 end of your paragraph does not trigger the agent code, just add or
-delete spaces at the end the server is called.
+delete spaces at the end until the server is called.
 
 ## Usage
 
