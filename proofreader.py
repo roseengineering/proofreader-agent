@@ -1652,6 +1652,15 @@ def create_server(args):
 
     class ProofreadHandler(BaseHTTPRequestHandler):
 
+        def do_GET(self):
+            response = json.dumps([
+                {"name": "English (US)", "code": "en", "longCode": "en-US"}
+            ]).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(response)
+
         def do_POST(self):
             nonlocal future
             nonlocal past_text
