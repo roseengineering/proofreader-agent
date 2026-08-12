@@ -5,14 +5,14 @@ Simple grammar proofreader agent using the the
 LanguageTool protocol.  
 
 
-## Works in LibreOffice
+## Setup - LibreOffice
 
 To use it in LibreOffice enable LanguageTool 
-support under preferences > languages and locales > writing aids (enable
-languagetools) and languagetool server settings (set base url to
-http://127.0.0.1:8081)
+support under Preferences > Languages and Locales > Writing Aids (enable
+LanguageTools) and LanguageTool server settings (set base url to
+http://127.0.0.1:8081).  There is also a extension for chrome.
 
-## Installation
+## Python Installation
 
 The server is a python script so either pip install
 litellm and run it or use "uv":
@@ -35,7 +35,7 @@ constantly (though not in parallel).
 ## Special Notes
 
 Since LibreOffice enforces a timeout when calling the server,
-the LLM called in the background.  To get the latest grammar checks
+the LLM is called in the background.  To get the latest grammar checks
 the server needs to be called again.  Since adding spaces at the
 end of your paragraph does not trigger the agent code, just add or
 delete spaces at the end the server is called.
