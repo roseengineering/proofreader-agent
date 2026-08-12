@@ -1,7 +1,7 @@
 
-# proofreader.py
-
 ![Example of use with LLM content](res/banner.png)
+
+# proofreader.py
 
 Simple grammar proofreader agent using the the
 LanguageTool protocol.  
