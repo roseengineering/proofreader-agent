@@ -3,7 +3,7 @@
 
 # proofreader.py
 
-Simple grammar proofreader agent using the the
+Simple grammar Proof Reader agent using the the
 LanguageTool protocol.  
 
 ## Setup - LibreOffice
