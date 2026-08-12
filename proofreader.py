@@ -1653,9 +1653,11 @@ def create_server(args):
     class ProofreadHandler(BaseHTTPRequestHandler):
 
         def do_GET(self):
-            response = json.dumps([
-                {"name": "English (US)", "code": "en", "longCode": "en-US"}
-            ]).encode()
+            response = json.dumps([{
+                "name": "English (US)", 
+                "code": "en", 
+                "longCode": "en-US"
+            }]).encode()
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
@@ -1665,19 +1667,18 @@ def create_server(args):
             nonlocal future
             nonlocal past_text
             length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(length).decode('utf-8')
+            body = self.rfile.read(length).decode()
             params = urllib.parse.parse_qs(body)
             text = params.get('text', [''])[0].strip()
             print('text:', repr(text))
 
             if future and future.done():
-                corrections.clear()
                 corrections.extend(future.result())
                 print('--- corrections pulled.')
                 future = None
 
             if future is None:
-                if text != past_text:
+                if text and text != past_text:
                     print('submitting text...')
                     future = executor.submit(proofread, text, model=model)
                     past_text = text
