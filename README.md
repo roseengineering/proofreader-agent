@@ -11,7 +11,8 @@ LanguageTool protocol.
 To use it in LibreOffice enable LanguageTool 
 support under Preferences > Languages and Locales > Writing Aids (enable
 LanguageTools) and LanguageTool server settings (set base url to
-http://127.0.0.1:8081).  There is also a extension for chrome.
+http://127.0.0.1:8081).  (There is also a extension for Chrome. But its
+"async" protocol is a bit different so it is not supported yet.)
 
 ## Python Installation
 
