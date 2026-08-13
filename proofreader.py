@@ -1724,6 +1724,7 @@ def main():
     args = parser.parse_args()
     if args.interactive:
         while True:
+            import readline
             prompt = input('prompt> ')
             proofread(prompt, args.model, interactive=True)
     server = create_server(args)
