@@ -1145,7 +1145,7 @@ Table 1 contains the principal parts of all irregular verbs whose past tense and
 
 Most errors in the use of irregular verbs occur with those in Table 1. The past tense must not be used with *have* (*has*, *had*). Do not use such expressions as *have drove* and *has went*. Equally disagreeable is the use of the perfect participle for the past tense; as, *she seen*, *they done*.
 
-Table I 
+### Table I 
 
 +---------------------+-------------------+-------------------+-------------------+-------------------+
 | Present Tense       |                   | Past Tense        |                   | Perf. Part.       |
@@ -1268,7 +1268,7 @@ Table I
 | write               |                   | wrote             |                   | written           |
 +---------------------+-------------------+-------------------+-------------------+-------------------+
 
-Table II
+### Table II
 
 This table contains the principal parts of all irregular verbs whose past tense and perfect participles are alike.
 
@@ -1353,11 +1353,11 @@ This table contains the principal parts of all irregular verbs whose past tense 
   make                       made                                                    
   --------------- ---------- ----------------- ---------- --------------- ---------- -----------------
 
-Table III
+### Table III
 
 This table includes verbs that are both regular and irregular.
 
-A
+#### A
 
 Verbs in which the regular form is preferred.
 
@@ -1452,7 +1452,7 @@ Verbs in which the regular form is preferred.
   work                                     worked, wrought                       worked, wrought
   ------------------------- -------------- ---------------------- -------------- ----------------------
 
-B
+#### B
 
 Verbs in which the irregular form is preferred.
 
@@ -1574,13 +1574,14 @@ def call_api(model, messages):
         return {"error": f"litellm call failed: {err}"}
 
 
-def proofread(target, model):
+def proofread(target, model, interactive=False):
         messages = []
         suggestions = []
 
         # system prompt
-        content = SYSTEM_PROMPT.strip()
-        messages.append({ "role": "system", "content": content })
+        if not interactive:
+             content = SYSTEM_PROMPT.strip()
+             messages.append({ "role": "system", "content": content })
 
         # instructions
         content = GRAMMAR_RULES.strip()
@@ -1593,7 +1594,7 @@ def proofread(target, model):
         for iterations in range(MAX_TRIES):
             response = call_api(model, messages)
             if "error" in response:
-                print(f"error: {response['error']}")
+                print(f"agent error: {response['error']}")
                 break
 
             d = response.choices[0]
@@ -1605,11 +1606,11 @@ def proofread(target, model):
 
             # debug
             if reasoning_content:
-                print(f'--- thinking\n{reasoning_content}')
+                print(f'--- agent thinking\n{reasoning_content}')
             if message_content:
-                print(f'--- message\n{message_content}')
+                print(f'--- agent message\n{message_content}')
             for tc in tool_calls:
-                print(f'--- tool\n{tc.function.name}({tc.function.arguments})')
+                print(f'--- agent tool\n{tc.function.name}({tc.function.arguments})')
 
             # append reply
             content = message_content or reasoning_content
@@ -1639,7 +1640,7 @@ def proofread(target, model):
                     "tool_call_id": tc.id, 
                     "content": result
                 })
-        print(f'---')
+        print('--- agent done')
         return suggestions
 
 
@@ -1669,19 +1670,19 @@ def create_server(args):
             length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(length).decode()
             params = urllib.parse.parse_qs(body)
-            text = params.get('text', [''])[0].strip()
-            print('text:', repr(text))
+            text = params.get('text', [''])[0]
+            text = text.strip()
+            print('> received text:', repr(text))
 
             if future and future.done():
+                print('> corrections pulled.')
                 corrections.extend(future.result())
-                print('--- corrections pulled.')
                 future = None
 
-            if future is None:
-                if text and text != past_text:
-                    print('submitting text...')
-                    future = executor.submit(proofread, text, model=model)
-                    past_text = text
+            if future is None and text and text != past_text:
+                print('> submitting text.')
+                future = executor.submit(proofread, text, model=model)
+                past_text = text
 
             matches = []
             for i, d in enumerate(corrections):
@@ -1689,14 +1690,16 @@ def create_server(args):
                 new = d['new']
                 reason = d['reason']
                 offset = text.find(old)
+                length = len(old)
                 if offset != -1:
                     matches.append({
                         "message": reason,
                         "offset": offset,
-                        "length": len(old),
+                        "length": length,
                         "replacements": [{"value": new}],
                         "rule": { "issueType": "grammar" }
                     })
+
             response = json.dumps({
                 "software": {"name": "CustomPython"}, 
                 "matches": matches
@@ -1717,7 +1720,12 @@ def main():
     parser.add_argument("--host", default='127.0.0.1', help="host to serve.")
     parser.add_argument("--port", type=int, default=8081, help="port to serve.")
     parser.add_argument("--model", default=MODEL, help="prefix with provider.")
+    parser.add_argument('--interactive', action='store_true', help='ask grammar questions')
     args = parser.parse_args()
+    if args.interactive:
+        while True:
+            prompt = input('prompt> ')
+            proofread(prompt, args.model, interactive=True)
     server = create_server(args)
     server.serve_forever()
 
