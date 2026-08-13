@@ -1723,8 +1723,8 @@ def main():
     parser.add_argument('--interactive', action='store_true', help='ask grammar questions')
     args = parser.parse_args()
     if args.interactive:
+        import readline
         while True:
-            import readline
             prompt = input('prompt> ')
             proofread(prompt, args.model, interactive=True)
     server = create_server(args)
